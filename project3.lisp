@@ -292,21 +292,21 @@ POP-SIZE, using various functions"
 (defparameter *boolean-crossover-probability* 0.2)
 (defparameter *boolean-mutation-probability* 0.01)
 (defun boolean-vector-modifier (ind1 ind2)
-   (let* ((child1 ind1)
-    (child2 ind2))
+   (copy-seq child1 ind1)
+   (copy-seq child2 ind2)
     (uniform-crossover child1 child2)
      (dotimes (i *boolean-vector-length*) 
-            (if ( > (random 1.0) *boolean-mutation-probability*)
+            (if ( < (random 1.0) *boolean-mutation-probability*)
             (setf (elt child1 i) (not (elt child1 i) )
             )
         )
-            (if ( > (random 1.0) *boolean-mutation-probability*)
+            (if ( < (random 1.0) *boolean-mutation-probability*)
             (setf (elt child2 i) (not (elt child2 i) )
             )
         )
     )
     (list child1 child2)
-   )    
+   
 )        
     
   "Copies and modifies ind1 and ind2 by crossing them over with a uniform crossover,
@@ -327,8 +327,9 @@ given allele in a child will mutate.  Mutation simply flips the bit of the allel
   "Performs uniform crossover on the two individuals, modifying them in place.
 *crossover-probability* is the probability that any given allele will crossover.  
 The individuals are guaranteed to be the same length.  Returns NIL."
+    
     (dotimes (i *boolean-vector-length*) 
-            (if ( > (random 1.0) *boolean-crossover-probability*)
+            (if ( < (random 1.0) *boolean-crossover-probability*)
             (ROTATEF (elt ind1 i) (elt ind2 i) )
             )
         )
