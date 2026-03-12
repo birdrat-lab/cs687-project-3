@@ -113,7 +113,12 @@ given mean and variance (using the Box-Muller-Marsaglia method)"
 ;; is this a good setting?  Try tweaking it (any integer >= 2) and see
 (defparameter *tournament-size* 7)
 (defun tournament-select-one (population fitnesses)
-  "Does one tournament selection and returns the selected individual."
+(let* ((best-index (random (length population))))
+    (dotimes (i (1- *tournament-size*) (elt population best-index))
+      (let ((next-index (random (length population))))
+        (when (> (elt fitnesses next-index) (elt fitnesses best-index))
+          (setf best-index next-index)))))
+ ;"Does one tournament selection and returns the selected individual."
 
   ;;; IMPLEMENT ME
   ;;;
@@ -131,7 +136,7 @@ given mean and variance (using the Box-Muller-Marsaglia method)"
 
 (defun tournament-selector (num population fitnesses)
   "Does NUM tournament selections, and puts them all in a list, then returns the list"
-
+(generate-list num #'(lambda () (tournament-select-one population fitnesses)))
   ;;; IMPLEMENT ME
   ;;;
   ;;; Hints:
@@ -174,32 +179,36 @@ POP-SIZE, using various functions"
     (funcall setup)
     (let* ((population)
         (fitness)
-        (best 0)
+        (best (make-array *boolean-vector-length* :initial-element 0))
         (Q)
-        (pop-size 10)
         (parenta)
         (parentb)
         (children)
+        (pop-size 10)
         )
+        (dotimes (j 5)
         ;(setf population (generate-list pop-size boolean-vector-creator)
         (dotimes (i pop-size)
             (push (boolean-vector-creator) population) 
         )
         (setf fitness (mapcar #'boolean-vector-evaluator population))
         (dotimes (i pop-size)
-            (if (< (elt fitness best) (elt fitness i))
-                (setf best i))
+            (if (< (boolean-vector-evaluator best) (elt fitness i))
+                (progn (setf best (elt population i)))
+                (print (boolean-vector-evaluator best))
+                ))
         )
-        (dotimes (i 5)
-          (setf parenta (elt population i))
-          (setf parentb (elt population (+ i 1)))
+        (dotimes (i (/ pop-size 2))
+          (setf parenta (tournament-select-one population fitness))
+          (setf parentb (tournament-select-one population fitness))
           (setf children (boolean-vector-modifier parenta parentb))
         (push (elt children 0) q)
         (push (elt children 1) q)
        )
        (setf population q)
+        )
     )
-
+        
   ;;; IMPLEMENT ME
   ;;;
   ;; The functions passed in are as follows:
@@ -292,8 +301,8 @@ POP-SIZE, using various functions"
 (defparameter *boolean-crossover-probability* 0.2)
 (defparameter *boolean-mutation-probability* 0.01)
 (defun boolean-vector-modifier (ind1 ind2)
-   (copy-seq child1 ind1)
-   (copy-seq child2 ind2)
+   (let* ((child1 (copy-seq ind1)) ;; Double parentheses are required here
+    (child2 (copy-seq ind2)))
     (uniform-crossover child1 child2)
      (dotimes (i *boolean-vector-length*) 
             (if ( < (random 1.0) *boolean-mutation-probability*)
@@ -308,7 +317,7 @@ POP-SIZE, using various functions"
     (list child1 child2)
    
 )        
-    
+) 
   "Copies and modifies ind1 and ind2 by crossing them over with a uniform crossover,
 then mutates the children.  *crossover-probability* is the probability that any
 given allele will crossover.  *mutation-probability* is the probability that any
