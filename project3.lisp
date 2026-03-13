@@ -113,11 +113,20 @@ given mean and variance (using the Box-Muller-Marsaglia method)"
 ;; is this a good setting?  Try tweaking it (any integer >= 2) and see
 (defparameter *tournament-size* 7)
 (defun tournament-select-one (population fitnesses)
-(let* ((best-index (random (length population))))
-    (dotimes (i (1- *tournament-size*) (elt population best-index))
-      (let ((next-index (random (length population))))
-        (when (> (elt fitnesses next-index) (elt fitnesses best-index))
-          (setf best-index next-index)))))
+(let* ((best (copy-seq (random-elt population)))
+(challenger NIL))
+(dotimes (i *tournament-size*)
+  (setf challenger (copy-seq(random-elt population) ))
+  (if (< (boolean-vector-evaluator best) (boolean-vector-evaluator challenger))
+  (setf best challenger )
+  )
+)
+  ;"Does one tournament selection and returns the selected individual."
+  best
+)
+
+)
+
  ;"Does one tournament selection and returns the selected individual."
 
   ;;; IMPLEMENT ME
@@ -130,13 +139,11 @@ given mean and variance (using the Box-Muller-Marsaglia method)"
   ;;; 3. You might want to do a loop, and keep track of both the
   ;;;    best individual you've found so far and also its fitness
 
-)
 
 
 
 (defun tournament-selector (num population fitnesses)
   "Does NUM tournament selections, and puts them all in a list, then returns the list"
-(generate-list num #'(lambda () (tournament-select-one population fitnesses)))
   ;;; IMPLEMENT ME
   ;;;
   ;;; Hints:
