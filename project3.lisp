@@ -183,7 +183,7 @@ prints that fitness and individual in a pleasing manner."
 	       &key setup creator selector modifier evaluator printer)
   "Evolves for some number of GENERATIONS, creating a population of size
 POP-SIZE, using various functions"
-    (funcall setup)
+    ;(funcall setup)
      (let* ((population)
         (fitness)
         (best-overall 0)
@@ -225,7 +225,8 @@ POP-SIZE, using various functions"
         (setf best-overall (elt fitness best-currently))
         (print best-overall)
         (if (= best-overall 100)
-        (return))
+        (progn (print best-individual)
+        (return-from evolve)))
         )))
         
       (setf population q)
