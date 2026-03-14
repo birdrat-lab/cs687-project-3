@@ -626,6 +626,28 @@ plus the number of unfilled slots in the horizon, is >= size.
 Then fills the remaining slots in the horizon with terminals.
 Terminals like X should be added to the tree
 in function form (X) rather than just X."
+(defvar size)
+(setf size 2)
+(gp-symbolic-regression-setup)
+(if (= size 1)
+  (elt *terminal-set* (random (length *terminal-set*)))
+  (progn 
+    (let* ((count 1)
+      (queue (make-queue))
+      (root (copy-seq (elt *nonterminal-set* (random (length *nonterminal-set*))))))
+      (if (= (elt root 1) 2)
+        (progn
+          (setf (elt root 1) '(_))
+          (setf root (append root '(_)))
+          (setf (elt root 2) '(_))
+          (enqueue (elt root 1) queue)
+          (enqueue (elt root 2) queue))
+        (progn 
+          (setf (elt root 1) '(_))
+          (enqueue (elt root 1) queue)))
+        (print root)
+        (print queue)
+        )))
 
   #|
   The simple version of PTC2 you will implement is as follows:
@@ -676,6 +698,7 @@ in function form (X) rather than just X."
 (defun gp-creator ()
   "Picks a random number from 1 to 20, then uses ptc2 to create
 a tree of that size"
+
 
     ;;; IMPLEMENT ME
   )
