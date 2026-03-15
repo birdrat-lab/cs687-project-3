@@ -627,28 +627,64 @@ Then fills the remaining slots in the horizon with terminals.
 Terminals like X should be added to the tree
 in function form (X) rather than just X."
 (defvar size)
-(setf size 2)
+(setf size 4)
 (gp-symbolic-regression-setup)
 (if (= size 1)
   (elt *terminal-set* (random (length *terminal-set*)))
   (progn 
     (let* ((count 1)
       (queue (make-queue))
-      (root (copy-seq (elt *nonterminal-set* (random (length *nonterminal-set*))))))
-      (if (= (elt root 1) 2)
+      (root (copy-seq (elt *nonterminal-set* (random (length *nonterminal-set*)))))
+      (args (elt root 1)))   
+      (setf (elt root 1) '(_))
+      (enqueue (elt root 1) queue)
+      (if (= args 2)
         (progn
-          (setf (elt root 1) '(_))
           (setf root (append root '(_)))
           (setf (elt root 2) '(_))
-          (enqueue (elt root 1) queue)
-          (enqueue (elt root 2) queue))
-        (progn 
-          (setf (elt root 1) '(_))
-          (enqueue (elt root 1) queue)))
-        (print root)
-        (print queue)
-        )))
+          (enqueue (elt root 2) queue)))
+      (print root) 
+      (loop while(> size (+ count (length queue)))
+      do
+      (let* ((a nil)
+      (s nil)
+      (args nil))
+       (setf count (+ 1 count))    
+      ;(setf s (elt queue (random (length queue))))
+      (setf s (random-dequeue queue))
+      ;(print (car s))
+      
+      ))
+      ; (setf a (copy-seq (elt *nonterminal-set* (random (length *nonterminal-set*)))))
+      ; (print a)
+      ;(setf args (elt a 1))   
+      ;(setf (elt a 1) '(_))
+      ;(enqueue (elt a 1) queue)
+      ;(if (= args 2)
+      ;    (progn
+      ;      (setf a (append a '(_)))
+      ;      (setf (elt a 2) '(_))
+      ;      (enqueue (elt a 2) queue)))
+      ;(setf (car s) (copy-seq a))
+      ;(print root)  
+     ;(loop while(0 <(length queue))
+     ; do
+     ;  (setf s (random-dequeue queue))
+     ;  (setf a (copy-seq (elt *terminal-set* (random (length *terminal-set*)))))  
+     ; (setf (car s) (copy-seq a))
+     ; (print root)  
+      
+      ;)
+      ))
+    )
+      )
+   
+ 
+ 
 
+
+
+ 
   #|
   The simple version of PTC2 you will implement is as follows:
 
@@ -696,6 +732,7 @@ in function form (X) rather than just X."
 
 (defparameter *size-limit* 20)
 (defun gp-creator ()
+(pc2 (+ 1 (random 20)))
   "Picks a random number from 1 to 20, then uses ptc2 to create
 a tree of that size"
 
@@ -727,6 +764,37 @@ If n is bigger than the number of nodes in the tree
  (not including the root), then we return n - nodes_in_tree
  (except for root)."
 
+(defvar p)
+(setf p 0)
+(defvar example)
+(defvar queue)
+(defvar parents)
+(setf queue (make-queue))
+(setf parents (make-queue))
+(defvar tmp)
+
+(dotimes (i (length example))
+  (enqueue (elt example (- (length example) (+ i 1))) queue))
+(loop while (> (length queue) 0)
+  do (setf tmp (vector-pop queue))
+  
+  (if (listp tmp)
+     (progn (print tmp)
+      (if (typep (elt tmp (- (length tmp) 1)) 'integer)
+        (incf (elt tmp (- (length tmp) 1)))
+        (progn (setf tmp (append tmp `(0)))
+        (enqueue tmp queue)
+        (dotimes (i (length tmp))
+          (enqueue (elt tmp (- (length tmp) (+ i 1))) queue)
+        )
+        )
+        
+
+      )
+      )
+      
+    )
+)
   ;;; this is best described with an example:
   ;    (dotimes (x 12)
   ;           (print (nth-subtree-parent
