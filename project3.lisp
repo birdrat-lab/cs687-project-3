@@ -762,13 +762,16 @@ If n is bigger than the number of nodes in the tree
  (except for root)."
 
 (let* ((index 0)
-  (queue (make-queue))
+  (defvar *stack*)
   (element NIL)
   (tmp NIL))
 (dotimes (i (length example))
-  (enqueue (elt example (- (length example) (+ i 1))) queue))
+  (push (elt example (- (length example) (+ i 1))) *stack*))
+
+;  (enqueue (elt example (- (length example) (+ i 1))) queue))
 (loop while (> (length queue) 0)
-  do (setf tmp (vector-pop queue))
+  ;do (setf tmp (vector-pop queue))
+  do (setf tmp (pop *stack*))
   (if (listp tmp)
   (progn
     (if (not ( integerp (elt tmp (- (length tmp) 1))))
@@ -776,10 +779,12 @@ If n is bigger than the number of nodes in the tree
       (progn (if ( integerp (elt tmp (- (length tmp) 1)))
         (incf (elt tmp (- (length tmp) 1))))))
     (if (>(- (length tmp) 2) (elt tmp (- (length tmp) 1))) 
-      (progn (enqueue tmp queue))
+      (progn (push tmp *stack*))
+      ;(progn (enqueue tmp queue))
         (dotimes (i (length tmp))
         (if (listp tmp)
-          (enqueue (elt tmp (- (length tmp) (+ i 1))) queue))
+;          (enqueue (elt tmp (- (length tmp) (+ i 1))) queue))
+          (push (elt tmp (- (length tmp) (+ i 1))) *stack*))
          (print (elt tmp (- (length tmp) (+ i 1))))
          )
     )
@@ -787,6 +792,7 @@ If n is bigger than the number of nodes in the tree
     ;(print tmp)
 )
 
+)
 )
 
 
