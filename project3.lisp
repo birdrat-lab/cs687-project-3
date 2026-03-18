@@ -166,13 +166,13 @@ prints that fitness and individual in a pleasing manner."
     fitnesses))
 
 
-(evolve 50 100
- 	:setup #'boolean-vector-sum-setup
-	:creator #'boolean-vector-creator
-	:selector #'tournament-selector
-	:modifier #'boolean-vector-modifier
-        :evaluator #'leading-ones-f
-	:printer #'simple-printer)
+;(evolve 50 100
+; 	:setup #'boolean-vector-sum-setup
+;	:creator #'boolean-vector-creator
+;	:selector #'tournament-selector
+;	:modifier #'boolean-vector-modifier
+;        :evaluator #'leading-ones-f
+;	:printer #'simple-printer)
 
 
 (defun evolve (generations pop-size
@@ -724,7 +724,7 @@ in function form (X) rather than just X."
 
   ;;; IMPLEMENT ME
 
-  )
+;  )
 
 
 (defparameter *size-limit* 20)
@@ -761,6 +761,48 @@ If n is bigger than the number of nodes in the tree
  (not including the root), then we return n - nodes_in_tree
  (except for root)."
 
+(let* ((index 0)
+  (queue (make-queue))
+  (element NIL)
+  (tmp NIL))
+(dotimes (i (length example))
+  (enqueue (elt example (- (length example) (+ i 1))) queue))
+(loop while (> (length queue) 0)
+  do (setf tmp (vector-pop queue))
+  (if (listp tmp)
+  (progn
+    (if (not ( integerp (elt tmp (- (length tmp) 1))))
+      (setf tmp (append tmp '(0)))
+      (progn (if ( integerp (elt tmp (- (length tmp) 1)))
+        (incf (elt tmp (- (length tmp) 1))))))
+    (if (>(- (length tmp) 2) (elt tmp (- (length tmp) 1))) 
+      (progn (enqueue tmp queue))
+        (dotimes (i (length tmp))
+        (if (listp tmp)
+          (enqueue (elt tmp (- (length tmp) (+ i 1))) queue))
+         (print (elt tmp (- (length tmp) (+ i 1))))
+         )
+    )
+  )
+    ;(print tmp)
+)
+
+)
+
+
+
+
+;	if(element.length-1 not integer)
+;		append 0 to the end of element
+;	else
+;		increment, element.length-1
+;	index = element.length-1
+;	while index < in element.length-1
+;		if item is atom, print element
+;		if item is list push 
+;			(if index of item in element< element.length) 
+;				push element onto stack,
+;			 push item onto stack
 (defvar p)
 (setf p 0)
 (defvar example)
