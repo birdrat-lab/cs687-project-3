@@ -762,84 +762,67 @@ If n is bigger than the number of nodes in the tree
  (except for root)."
 
 (let* ((index 0)
-  (defvar *stack*)
+  (queue (make-queue))
   (element NIL)
   (tmp NIL))
 (dotimes (i (length example))
-  (push (elt example (- (length example) (+ i 1))) *stack*))
-
-;  (enqueue (elt example (- (length example) (+ i 1))) queue))
+  (enqueue (elt example (- (length example) (+ i 1))) queue))
 (loop while (> (length queue) 0)
-  ;do (setf tmp (vector-pop queue))
-  do (setf tmp (pop *stack*))
-  (if (listp tmp)
-  (progn
+  do (setf tmp (vector-pop queue))
+  (loop while (i < (length tmp) 0)
+  (
+    do
     (if (not ( integerp (elt tmp (- (length tmp) 1))))
       (setf tmp (append tmp '(0)))
       (progn (if ( integerp (elt tmp (- (length tmp) 1)))
         (incf (elt tmp (- (length tmp) 1))))))
     (if (>(- (length tmp) 2) (elt tmp (- (length tmp) 1))) 
-      (progn (push tmp *stack*))
-      ;(progn (enqueue tmp queue))
+      (progn (enqueue tmp queue))
         (dotimes (i (length tmp))
         (if (listp tmp)
-;          (enqueue (elt tmp (- (length tmp) (+ i 1))) queue))
-          (push (elt tmp (- (length tmp) (+ i 1))) *stack*))
-         (print (elt tmp (- (length tmp) (+ i 1))))
+          (enqueue (elt tmp (- (length tmp) (+ i 1))) queue))
+        ;(print (elt tmp (- (length tmp) (+ i 1))))
          )
     )
   )
-    ;(print tmp)
-)
-
-)
+    
 )
 
 
 
+(setf tmp (vector-pop queue)
+)
 
-;	if(element.length-1 not integer)
-;		append 0 to the end of element
-;	else
-;		increment, element.length-1
-;	index = element.length-1
-;	while index < in element.length-1
-;		if item is atom, print element
-;		if item is list push 
-;			(if index of item in element< element.length) 
-;				push element onto stack,
-;			 push item onto stack
-(defvar p)
-(setf p 0)
-(defvar example)
-(defvar queue)
-(defvar parents)
-(setf queue (make-queue))
-(setf parents (make-queue))
-(defvar tmp)
 
-(dotimes (i (length example))
-  (enqueue (elt example (- (length example) (+ i 1))) queue))
-(loop while (> (length queue) 0)
-  do (setf tmp (vector-pop queue))
-  
-  (if (listp tmp)
-     (progn (print tmp)
-      (if (typep (elt tmp (- (length tmp) 1)) 'integer)
-        (incf (elt tmp (- (length tmp) 1)))
-        (progn (setf tmp (append tmp `(0)))
-        (enqueue tmp queue)
-        (dotimes (i (length tmp))
-          (enqueue (elt tmp (- (length tmp) (+ i 1))) queue)
-        )
-        )
-        
-
-      )
-      )
-      
+(let* ((index 0)
+  (queue (make-queue))
+  (tmp NIL)
+  (i 0)
+  (elements 1)
+  )
+  (setf tmp example)
+(loop while (> elements 0)
+  do (setf tmp (vector-pop queue)
+  (loop while (< i (length tmp))
+    do
+    (if (not ( integerp (elt tmp (- (length tmp) 1))))
+      (setf tmp (append tmp '(0)))
+      (progn (if ( integerp (elt tmp (- (length tmp) 1)))
+        (incf (elt tmp (- (length tmp) 1))))))
+    (setf i (elt tmp (- (length tmp) 1)))    
+    (print tmp)
+    (if (listp (elt tmp i))
+    (progn (enqueue tmp queue)
+    (setf tmp (elt tmp i))
+    (incf elements)
+    )   
     )
+  )
 )
+)
+
+
+
   ;;; this is best described with an example:
   ;    (dotimes (x 12)
   ;           (print (nth-subtree-parent
