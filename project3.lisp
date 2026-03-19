@@ -761,49 +761,21 @@ If n is bigger than the number of nodes in the tree
  (not including the root), then we return n - nodes_in_tree
  (except for root)."
 
-(let* ((index 0)
-  (queue (make-queue))
-  (element NIL)
-  (tmp NIL))
-(dotimes (i (length example))
-  (enqueue (elt example (- (length example) (+ i 1))) queue))
-(loop while (> (length queue) 0)
-  do (setf tmp (vector-pop queue))
-  (loop while (i < (length tmp) 0)
-  (
-    do
-    (if (not ( integerp (elt tmp (- (length tmp) 1))))
-      (setf tmp (append tmp '(0)))
-      (progn (if ( integerp (elt tmp (- (length tmp) 1)))
-        (incf (elt tmp (- (length tmp) 1))))))
-    (if (>(- (length tmp) 2) (elt tmp (- (length tmp) 1))) 
-      (progn (enqueue tmp queue))
-        (dotimes (i (length tmp))
-        (if (listp tmp)
-          (enqueue (elt tmp (- (length tmp) (+ i 1))) queue))
-        ;(print (elt tmp (- (length tmp) (+ i 1))))
-         )
-    )
-  )
-    
-)
 
 
-
-(setf tmp (vector-pop queue)
-)
 
 
 (let* ((index 0)
   (queue (make-queue))
   (tmp NIL)
   (i 0)
-  (elements 1)
-  )
-  (setf tmp example)
-(loop while (> elements 0)
-  do (setf tmp (vector-pop queue)
-  (loop while (< i (length tmp))
+  (example '(a (b c) (d e (f (g h i j)) k))))
+(setf example (append example '(0)))  
+(enqueue example queue)
+(loop while (> (length queue) 0)
+  do (setf tmp (vector-pop queue))
+  (setf i (elt tmp (- (length tmp) 1)))   
+  (loop while (< i (- (length tmp) 1))
     do
     (if (not ( integerp (elt tmp (- (length tmp) 1))))
       (setf tmp (append tmp '(0)))
@@ -811,14 +783,16 @@ If n is bigger than the number of nodes in the tree
         (incf (elt tmp (- (length tmp) 1))))))
     (setf i (elt tmp (- (length tmp) 1)))    
     (print tmp)
-    (if (listp (elt tmp i))
-    (progn (enqueue tmp queue)
-    (setf tmp (elt tmp i))
-    (incf elements)
+(if (listp (elt tmp i))
+        (progn 
+          (if (not (integerp (elt tmp (1- (length tmp)))))
+              (setf tmp (append tmp '(0))))
+         (enqueue tmp queue)
+        (setf tmp (append (elt tmp i) '(0))))
+    )
     )   
     )
   )
-)
 )
 
 
