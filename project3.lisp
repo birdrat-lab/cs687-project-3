@@ -777,23 +777,27 @@ If n is bigger than the number of nodes in the tree
   (setf i (elt tmp (- (length tmp) 1)))   
   (loop while (< i (- (length tmp) 1))
     do
-    (if (not ( integerp (elt tmp (- (length tmp) 1))))
-      (setf tmp (append tmp '(0)))
-      (progn (if ( integerp (elt tmp (- (length tmp) 1)))
-        (incf (elt tmp (- (length tmp) 1))))))
-    (setf i (elt tmp (- (length tmp) 1)))    
-    (print tmp)
+     ; (print i)
+  ;(print (length tmp))
+ (print tmp)   
+      (incf i)
+      ;(incf (elt tmp (- (length tmp) 1)))
+    (setf (elt tmp (- (length tmp) 1)) i)    
+    (print i)
 (if (listp (elt tmp i))
-        (progn 
-          (if (not (integerp (elt tmp (1- (length tmp)))))
-              (setf tmp (append tmp '(0))))
-         (enqueue tmp queue)
-        (setf tmp (append (elt tmp i) '(0))))
+    (progn 
+ 
+      (enqueue tmp queue)
+       (setf tmp (append (elt tmp i) '(0)))
+ 
+       (setf i 0)
+       ))
+        
     )
     )   
     )
-  )
-)
+  
+
 
 
 
