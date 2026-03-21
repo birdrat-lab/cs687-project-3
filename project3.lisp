@@ -312,7 +312,7 @@ POP-SIZE, using various functions"
 (defun boolean-vector-creator ()
     (let* ((individual (make-array *boolean-vector-length*))) 
         (loop for i from 0 to (- *boolean-vector-length* 1) do
-            (if ( =  (random 2) 1)
+            (if (  < (random 1.0) 0.5)
             (setf (aref individual i) t)
             (setf (aref individual i) NIL)
             )
@@ -777,14 +777,11 @@ If n is bigger than the number of nodes in the tree
   (setf i (elt tmp (- (length tmp) 1)))   
   (loop while (< i (- (length tmp) 1))
     do
-     ; (print i)
-  ;(print (length tmp))
- (print tmp)   
-      (incf i)
-      ;(incf (elt tmp (- (length tmp) 1)))
+    (print tmp)   
+    (incf i)
     (setf (elt tmp (- (length tmp) 1)) i)    
     (print i)
-(if (listp (elt tmp i))
+    (if (listp (elt tmp i))
     (progn 
  
       (enqueue tmp queue)
