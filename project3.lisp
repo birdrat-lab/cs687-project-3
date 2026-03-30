@@ -626,58 +626,65 @@ plus the number of unfilled slots in the horizon, is >= size.
 Then fills the remaining slots in the horizon with terminals.
 Terminals like X should be added to the tree
 in function form (X) rather than just X."
-(defvar size)
-(setf size 4)
+
+
+(defvar size 20)
+(defvar root)
 (gp-symbolic-regression-setup)
 (if (= size 1)
-  (elt *terminal-set* (random (length *terminal-set*)))
+  (progn
+  (setf root (elt *terminal-set* (random (length *terminal-set*))))
+  (print root)
+  )
   (progn 
     (let* ((count 1)
-      (queue (make-queue))
-      (root (copy-seq (elt *nonterminal-set* (random (length *nonterminal-set*)))))
-      (args (elt root 1)))   
-      (setf (elt root 1) '(_))
-      (enqueue (elt root 1) queue)
-      (if (= args 2)
-        (progn
-          (setf root (append root '(_)))
-          (setf (elt root 2) '(_))
-          (enqueue (elt root 2) queue)))
-      (print root) 
+      (queue (make-queue)))
+      (setf root (list NIL)) 
+      (enqueue root queue)
       (loop while(> size (+ count (length queue)))
       do
-      (let* ((a nil)
-      (s nil)
-      (args nil))
-      (setf a (copy-seq (elt *nonterminal-set* (random (length *nonterminal-set*)))))
-      (setf args (elt a 1))   
-      (setf (elt a 1) '(_))
+      (let* ((a (copy-seq (elt *nonterminal-set* (random (length *nonterminal-set*)))))
+      (s (random-dequeue queue))
+      (args (elt a 1))
+      )
+      (setf (elt a 1) (list NIL))
+      
       (enqueue (elt a 1) queue)
       (if (= args 2)
           (progn
-            (setf a (append a '(_)))
-            (setf (elt a 2) '(_))
-            (enqueue (elt a 2) queue)))    
-      (setf s (random-dequeue queue))
-      (setf count (+ 1 count)) 
-      (setf (car s) (copy-seq a))
-      
+            (setf a (append a (list (list NIL))))
+            (enqueue (elt a 2) queue)))
+      (setf (car s) a)
+      (incf count)
       ))
-  
+
      (loop while(< 0 (length queue))
       do
-       (setf s (random-dequeue queue))
-       (setf a (elt *terminal-set* (random (length *terminal-set*))))  
+      (let* ((s (random-dequeue queue))
+       (a (elt *terminal-set* (random (length *terminal-set*)))))  
       (setf (car s)  a)
-      (print root)  
-      
       )
       ))
+      (print root)
     )
-      )
-   
- 
- 
+    
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -762,9 +769,6 @@ If n is bigger than the number of nodes in the tree
  (except for root)."
 
 
-
-
-
 (let* ((index 0)
   (queue (make-queue))
   (tmp NIL)
@@ -774,27 +778,33 @@ If n is bigger than the number of nodes in the tree
 (enqueue example queue)
 (loop while (> (length queue) 0)
   do (setf tmp (vector-pop queue))
-  (setf i (elt tmp (- (length tmp) 1)))   
-  (loop while (< i (- (length tmp) 1))
+  (setf i (elt tmp (- (length tmp) 1)))  
+  (loop while (< i (- (length tmp) 2))
     do
-    (print tmp)   
-    (incf i)
-    (setf (elt tmp (- (length tmp) 1)) i)    
-    (print i)
+   (print tmp)
+       (incf i)
+    (setf (elt tmp (- (length tmp) 1)) i)  
     (if (listp (elt tmp i))
     (progn 
- 
       (enqueue tmp queue)
-       (setf tmp (append (elt tmp i) '(0)))
- 
-       (setf i 0)
-       ))
-        
+      (setf tmp (copy-list(append (elt tmp i) '(0))))
+      (setf i 0)      
+       )     
+       )
     )
     )   
     )
   
 
+
+          (enqueue tmp queue)
+      (print (list "A" (append (elt tmp i) '(0)) ))
+      ;(enqueue (append (elt tmp i) '(0)) queue)
+      (setf i 0)
+      (setf tmp (append (elt tmp i) '(0)))
+      (return
+           
+  
 
 
 
