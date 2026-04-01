@@ -628,7 +628,7 @@ Terminals like X should be added to the tree
 in function form (X) rather than just X."
 
 
-(defvar size 20)
+(defvar size 5)
 (defvar root)
 (gp-symbolic-regression-setup)
 (if (= size 1)
@@ -669,26 +669,7 @@ in function form (X) rather than just X."
     )
     
 )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
+)
   #|
   The simple version of PTC2 you will implement is as follows:
 
@@ -748,12 +729,30 @@ a tree of that size"
 
 ;;; GP TREE MODIFICATION CODE
 
+(defvar *example* '(a (b c) (d e (f (g h i j)) k)))
+
 (defun num-nodes (tree)
   "Returns the number of nodes in tree, including the root"
-
-    ;;; IMPLEMENT ME
+;(print (list "tree" tree))
+(let* ((i 0)
+(total 0))
+  (loop while (< i (length tree))
+    do  
+    
+    (if (listp (elt tree i))
+      (progn 
+      (print (elt tree i))
+      (print (+ total (num-nodes (elt tree i))))
+      (setf total (+ total (num-nodes (elt tree i))))
+      )
+      (incf total 1)
+    )
+    (incf i)
   )
-
+  total
+)
+)
+(num-nodes *example*) 
 
 (defun nth-subtree-parent (tree n)
   "Given a tree, finds the nth node by depth-first search though
@@ -794,17 +793,7 @@ If n is bigger than the number of nodes in the tree
     )
     )   
     )
-  
 
-
-          (enqueue tmp queue)
-      (print (list "A" (append (elt tmp i) '(0)) ))
-      ;(enqueue (append (elt tmp i) '(0)) queue)
-      (setf i 0)
-      (setf tmp (append (elt tmp i) '(0)))
-      (return
-           
-  
 
 
 
@@ -835,6 +824,8 @@ If n is bigger than the number of nodes in the tree
 
 (defparameter *mutation-size-limit* 10)
 (defun gp-modifier (ind1 ind2)
+
+
   "Flips a coin.  If it's heads, then ind1 and ind2 are
 crossed over using subtree crossover.  If it's tails, then
 ind1 and ind2 are each mutated using subtree mutation, where
