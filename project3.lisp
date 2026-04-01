@@ -772,15 +772,20 @@ If n is bigger than the number of nodes in the tree
   (queue (make-queue))
   (tmp NIL)
   (i 0)
+  (nth 0)
+  (parent NIL)
+  (n 9)
   (example '(a (b c) (d e (f (g h i j)) k))))
 (setf example (append example '(0)))  
 (enqueue example queue)
-(loop while (> (length queue) 0)
+(loop while (and (> (length queue) 0) (/= nth n))
   do (setf tmp (vector-pop queue))
   (setf i (elt tmp (- (length tmp) 1)))  
-  (loop while (< i (- (length tmp) 2))
+  (loop while (and (< i (- (length tmp) 2)) (/= nth n))
     do
    (print tmp)
+   (incf nth)
+   (setf parent (copy-list tmp))
        (incf i)
     (setf (elt tmp (- (length tmp) 1)) i)  
     (if (listp (elt tmp i))
@@ -792,6 +797,7 @@ If n is bigger than the number of nodes in the tree
        )
     )
     )   
+parent
     )
 
 
