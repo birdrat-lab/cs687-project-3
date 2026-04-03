@@ -85,7 +85,8 @@ new slot is created).  EQUALP is the test used for duplicates."
       (let ((candidate (funcall function)))
 	(unless (and no-duplicates
 		     (member candidate bag :test #'equalp))
-	  (push candidate bag))))))
+	  (push candidate bag))))
+    ))
 
 ;; hope this works right
 (defun gaussian-random (mean variance)
@@ -138,8 +139,9 @@ given mean and variance (using the Box-Muller-Marsaglia method)"
 
 
 (defun tournament-selector (num population fitnesses)
-(generate-list num (#'tournament-select-one population fitnesses))
-  "Does NUM tournament selections, and puts them all in a list, then returns the list"
+(generate-list num (lambda () (tournament-select-one population fitnesses)))
+
+  ;"Does NUM tournament selections, and puts them all in a list, then returns the list"
   ;;; IMPLEMENT ME
   ;;;
   ;;; Hints:
@@ -194,45 +196,38 @@ POP-SIZE, using various functions"
         (generations 1000))
         ;(print best-overall)
         (dotimes (i pop-size)
-            (push (boolean-vector-creator) population))
-        (dotimes (j generations)       
-          (setf fitness (mapcar #'boolean-vector-evaluator population))
-         ;   (setf best-currently 0)
-        ;(dotimes (i pop-size)
-        
-        ;    (if (> (elt fitness i) (elt fitness best-currently))
-        ;        (progn (setf best-currently i)
-
-            ;)
-          ;)
-        
-          (dotimes (i (/ pop-size 2))
-            ;(setf parents (tournament-selector 2 population fitness))
-            ;(setf parenta (elt parents 0))
-            ;(setf parentb (elt parents 1))
-            (setf parenta (tournament-select-one population fitness))
-            (setf parentb (tournament-select-one population fitness))
-            (setf children (boolean-vector-modifier parenta parentb))
+            (push (funcall creator) population))
+           ; (push (boolean-vector-creator) population))
+        (dotimes (j generations)  
+        (setf fitness (mapcar evaluator population))   
+          ;(setf fitness (mapcar #'boolean-vector-evaluator population)) 
+          
+            ;(setf parenta (tournament-select-one population fitness))
+            (setf parenta (funcall selector (/ pop-size 2) population fitness))
+             ;(setf parentb (tournament-select-one population fitness))
+             ;(print parentb)
+             
+            (setf parentb (funcall selector (/ pop-size 2) population fitness))
+        (dotimes (i (/ pop-size 2))
+            (setf children (funcall modifier (elt parenta i) (elt parentb i)))
             (push (elt children 0) q)
             (push (elt children 1) q))
-         
-     ;  (if (< best-overall (elt fitness best-currently))
-        
-     ;   (progn
-      ;  (setf best-individual (copy-seq (elt population best-currently)))
-      ;  (setf best-overall (elt fitness best-currently))
-      ;  (print best-overall)
-      ;  (if (= best-overall 100)
-      ;  (progn (print best-individual)
-      ;  (return-from evolve)))
-        ;))
-        
-        ;)
+
       (setf population q)
       (setf q NIL))
-        (simple-printer population fitness))   
+        (funcall printer population fitness)
+        )   
   ;)
         
+
+;       (let ((a NIL))
+;(mapcar (lambda (x) 
+;       (if (eq x t) (setf a (append a '(1)))
+;       (setf a (append a '(0)))
+;       )) 
+;     example) 
+;     (print a)
+;     )
   ;;; IMPLEMENT ME
   ;;;
   ;; The functions passed in are as follows:
@@ -269,6 +264,8 @@ POP-SIZE, using various functions"
 
 
 )
+
+
 
 
 
@@ -328,7 +325,8 @@ POP-SIZE, using various functions"
    (let* ((child1 (copy-seq ind1)) ;; Double parentheses are required here
     (child2 (copy-seq ind2)))
     (uniform-crossover child1 child2)
-     (dotimes (i *boolean-vector-length*) 
+     (dotimes (i *boolean-vector-length*)
+
             (if ( < (random 1.0) *boolean-mutation-probability*)
             (setf (elt child1 i) (not (elt child1 i))))
             (if ( < (random 1.0) *boolean-mutation-probability*)
@@ -354,6 +352,7 @@ given allele in a child will mutate.  Mutation simply flips the bit of the allel
 The individuals are guaranteed to be the same length.  Returns NIL."
     
     (dotimes (i *boolean-vector-length*) 
+   
             (if ( < (random 1.0) *boolean-crossover-probability*)
             (ROTATEF (elt ind1 i) (elt ind2 i)))))
 
@@ -410,7 +409,7 @@ then 1110000 is 1, 1111000 is 1, 1111100 is 1, and 1111110 is 2."
 	:creator #'boolean-vector-creator
 	:selector #'tournament-selector
 	:modifier #'boolean-vector-modifier
-        :evaluator #'leading-ones-f
+        :evaluator #'leading-ones-
 	:printer #'simple-printer)
 |#
 
@@ -654,7 +653,13 @@ in function form (X) rather than just X."
           (progn
             (setf a (append a (list (list NIL))))
             (enqueue (elt a 2) queue)))
-      (setf (car s) a)
+      ;(setf (car s) NIL)
+      ;(print (car s))
+      ;(print (append (car s) a) )
+      (setf (car s) (append (car s) a))
+      (print root)
+       ;(setf (car s) (cdr s))
+      ;(setf (car s) a)
       (incf count)
       ))
 
@@ -662,7 +667,9 @@ in function form (X) rather than just X."
       do
       (let* ((s (random-dequeue queue))
        (a (elt *terminal-set* (random (length *terminal-set*)))))  
-      (setf (car s)  a)
+       (print s)
+       (setf (car s) NIL)
+      (setf (car s) a)
       )
       ))
       (print root)
@@ -774,10 +781,9 @@ If n is bigger than the number of nodes in the tree
   (i 0)
   (nth 0)
   (parent NIL)
-  (n 9)
   (example '(a (b c) (d e (f (g h i j)) k))))
-(setf example (append example '(0)))  
-(enqueue example queue)
+(setf tree (append tree '(0)))  
+(enqueue tree queue)
 (loop while (and (> (length queue) 0) (/= nth n))
   do (setf tmp (vector-pop queue))
   (setf i (elt tmp (- (length tmp) 1)))  
@@ -799,7 +805,7 @@ If n is bigger than the number of nodes in the tree
     )   
 parent
     )
-
+)
 
 
 
@@ -825,7 +831,7 @@ parent
 
     ;;; IMPLEMENT ME
 
-  )
+
 
 
 (defparameter *mutation-size-limit* 10)
