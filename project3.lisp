@@ -184,6 +184,7 @@ POP-SIZE, using various functions"
     ;(funcall setup)
      (let* ((population)
         (fitness)
+        (population-integer)
         ;(best-overall 0)
         ;(best-currently 0)
         ;(best-individual (make-array *boolean-vector-length* :initial-element NIL))
@@ -192,21 +193,34 @@ POP-SIZE, using various functions"
         (parentb)
         (parents)
         (children)
-        (pop-size 100)
-        (generations 1000))
+        ;(pop-size 50)
+        ;(generations 1000)
+        )
         ;(print best-overall)
         (dotimes (i pop-size)
             (push (funcall creator) population))
            ; (push (boolean-vector-creator) population))
         (dotimes (j generations)  
-        (setf fitness (mapcar evaluator population))   
-          ;(setf fitness (mapcar #'boolean-vector-evaluator population)) 
           
+          ;(setf fitness (mapcar #'boolean-vector-evaluator population)) 
+
+        (setf population-integer NIL)  
+        (dotimes (i (length population))     
+          (let ((a NIL))
+          (dotimes (j (length (elt population i))) 
+            (if (eq  (elt (elt population i) j) t) 
+              (setf a (append a '(1)))
+              (setf a (append a '(0)))))
+          (setf a (append a '(0)))
+          (setf population-integer (append population-integer (list a)))))
+
+         (setf fitness (mapcar evaluator population-integer)) 
             ;(setf parenta (tournament-select-one population fitness))
             (setf parenta (funcall selector (/ pop-size 2) population fitness))
              ;(setf parentb (tournament-select-one population fitness))
              ;(print parentb)
-             
+
+
             (setf parentb (funcall selector (/ pop-size 2) population fitness))
         (dotimes (i (/ pop-size 2))
             (setf children (funcall modifier (elt parenta i) (elt parentb i)))
@@ -217,17 +231,9 @@ POP-SIZE, using various functions"
       (setf q NIL))
         (funcall printer population fitness)
         )   
+)
   ;)
         
-
-;       (let ((a NIL))
-;(mapcar (lambda (x) 
-;       (if (eq x t) (setf a (append a '(1)))
-;       (setf a (append a '(0)))
-;       )) 
-;     example) 
-;     (print a)
-;     )
   ;;; IMPLEMENT ME
   ;;;
   ;; The functions passed in are as follows:
@@ -263,7 +269,7 @@ POP-SIZE, using various functions"
   ;;; 3. Pay attention to the keyword arguments
 
 
-)
+
 
 
 
