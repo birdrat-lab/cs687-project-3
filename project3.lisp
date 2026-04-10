@@ -633,20 +633,19 @@ Terminals like X should be added to the tree
 in function form (X) rather than just X."
 
 
-(defvar size 5)
 (defvar root)
 (gp-symbolic-regression-setup)
 (if (= size 1)
   (progn
   (setf root (elt *terminal-set* (random (length *terminal-set*))))
-  (print root)
+  ;(print root)
   )
   (progn 
     (let* ((count 1)
       (queue (make-queue)))
       (setf root (list NIL)) 
       (enqueue root queue)
-      (loop while(> size (+ count (length queue)))
+      (loop while(> size (- (+ count (length queue)) 1))
       do
       (let* ((a (copy-seq (elt *nonterminal-set* (random (length *nonterminal-set*)))))
       (s (random-dequeue queue))
@@ -662,8 +661,10 @@ in function form (X) rather than just X."
       ;(setf (car s) NIL)
       ;(print (car s))
       ;(print (append (car s) a) )
-      (setf (car s) (append (car s) a))
-      (print root)
+      (setf (car s) (car a))
+      (setf (cdr s) (cdr a))
+      ;(setf (car s) (append (car s) a))
+      ;(print root)
        ;(setf (car s) (cdr s))
       ;(setf (car s) a)
       (incf count)
@@ -673,15 +674,16 @@ in function form (X) rather than just X."
       do
       (let* ((s (random-dequeue queue))
        (a (elt *terminal-set* (random (length *terminal-set*)))))  
-       (print s)
+       
        (setf (car s) NIL)
       (setf (car s) a)
       )
       ))
-      (print root)
+      
     )
     
 )
+root
 )
   #|
   The simple version of PTC2 you will implement is as follows:
@@ -767,7 +769,7 @@ a tree of that size"
 )
 (num-nodes *example*) 
 
-(defun nth-subtree-parent (tree n)
+
   "Given a tree, finds the nth node by depth-first search though
 the tree, not including the root node of the tree (0-indexed). If the
 nth node is NODE, let the parent node of NODE is PARENT,
@@ -780,38 +782,38 @@ If n is bigger than the number of nodes in the tree
  (not including the root), then we return n - nodes_in_tree
  (except for root)."
 
-
+(defun nth-subtree-parent (tree n)
 (let* ((index 0)
   (queue (make-queue))
   (tmp NIL)
+  (index-queue (make-queue))
   (i 0)
   (nth 0)
   (parent NIL)
   (example '(a (b c) (d e (f (g h i j)) k))))
-(setf tree (append tree '(0)))  
+
 (enqueue tree queue)
+(enqueue i index-queue)
 (loop while (and (> (length queue) 0) (/= nth n))
   do (setf tmp (vector-pop queue))
-  (setf i (elt tmp (- (length tmp) 1)))  
-  (loop while (and (< i (- (length tmp) 2)) (/= nth n))
+  (setf i (vector-pop index-queue)) 
+   (setf parent tmp)
+  (loop while (and (< i (- (length tmp) 1)) (/= nth n))
     do
-   (print tmp)
+    (print (list parent (elt tmp i)))
    (incf nth)
-   (setf parent (copy-list tmp))
-       (incf i)
-    (setf (elt tmp (- (length tmp) 1)) i)  
+  
+    (incf i)
+    (if (= nth n)
+                    (return-from nth-subtree-parent (list parent i)))
     (if (listp (elt tmp i))
-    (progn 
-      (enqueue tmp queue)
-      (setf tmp (copy-list(append (elt tmp i) '(0))))
-      (setf i 0)      
-       )     
-       )
-    )
-    )   
-parent
-    )
-)
+      (progn 
+        (enqueue tmp queue)
+        (enqueue i index-queue)
+      (setf parent (elt tmp i))
+      (setf tmp (elt tmp i))
+      (setf i 0))))   
+)))
 
 
 
@@ -839,11 +841,37 @@ parent
 
 
 
-
+(defun node-type (choice node)
+(if (and (< .1 choice) (listp node))
+  T
+  NIL
+  )
+)
 (defparameter *mutation-size-limit* 10)
 (defun gp-modifier (ind1 ind2)
+ (let* ((ind1-num (num-nodes ind1))
+ (ind2-num (num-nodes ind2))
+ (ind1-index (random ind1-num))
+ (ind2-index (random ind2-num))
+ (results nil)
+ (tmp NIL))
+  
+  (setf results (nth-subtree-parent ind1 1))
+  (setf ind1-nth (elt results 1))
+  (setf ind1-parent (elt results 0))
 
+  (setf results (nth-subtree-parent ind2 2))
+  (setf ind2-nth (elt results 1))
+  (setf ind2-parent (elt results 0))
 
+ (print (list "A" ind1))
+  (print (list "B" ind2))
+  (rotatef (elt ind1-parent ind1-nth) (elt ind2-parent ind2-nth))
+  (print (list "A" ind1))
+  (print (list "B" ind2))
+ )
+ )
+ 
   "Flips a coin.  If it's heads, then ind1 and ind2 are
 crossed over using subtree crossover.  If it's tails, then
 ind1 and ind2 are each mutated using subtree mutation, where
@@ -852,7 +880,7 @@ from 1 to 10 inclusive.  Doesn't damage ind1 or ind2.  Returns
 the two modified versions as a list."
 
     ;;; IMPLEMENT ME
-)
+
 
 
 
