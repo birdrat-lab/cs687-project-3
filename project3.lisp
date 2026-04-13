@@ -92,7 +92,7 @@ new slot is created).  EQUALP is the test used for duplicates."
 (defun gaussian-random (mean variance)
   "Generates a random number under a gaussian distribution with the
 given mean and variance (using the Box-Muller-Marsaglia method)"
-  (let (x y (w 0))
+  (let ((x 0) (y 0) (w 0))
     (while (not (and (< 0 w) (< w 1)))
 	   (setf x (- (random 2.0) 1.0))
 	   (setf y (- (random 2.0) 1.0))
@@ -114,14 +114,16 @@ given mean and variance (using the Box-Muller-Marsaglia method)"
 ;; is this a good setting?  Try tweaking it (any integer >= 2) and see
 (defparameter *tournament-size* 7)
 (defun tournament-select-one (population fitnesses)
-(let* ((best (copy-seq (random-elt population)))
+(let* ((best (random ( length population)))
 (challenger NIL))
 (dotimes (i *tournament-size*)
-  (setf challenger (copy-seq(random-elt population)))
-  (if (< (boolean-vector-evaluator best) (boolean-vector-evaluator challenger))
-  (setf best challenger )))
+ (setf challenger (random (length population)))
+  
+    (if (< (elt fitnesses best) (elt fitnesses challenger))
+      (setf best challenger ))
+)
   ;"Does one tournament selection and returns the selected individual."
-  best))
+  (elt population best)))
 
  ;"Does one tournament selection and returns the selected individual."
 
@@ -197,14 +199,17 @@ POP-SIZE, using various functions"
         ;(generations 1000)
         )
         ;(print best-overall)
+        (funcall setup)
         (dotimes (i pop-size)
             (push (funcall creator) population))
            ; (push (boolean-vector-creator) population))
         (dotimes (j generations)  
-          
           ;(setf fitness (mapcar #'boolean-vector-evaluator population)) 
+             
 
         (setf population-integer NIL)  
+        
+        (if (typep (elt (elt population 1) 1) 'boolean)
         (dotimes (i (length population))     
           (let ((a NIL))
           (dotimes (j (length (elt population i))) 
@@ -213,19 +218,26 @@ POP-SIZE, using various functions"
               (setf a (append a '(0)))))
           (setf a (append a '(0)))
           (setf population-integer (append population-integer (list a)))))
+          (setf population-integer population)
+          )
+ 
 
          (setf fitness (mapcar evaluator population-integer)) 
+         
             ;(setf parenta (tournament-select-one population fitness))
             (setf parenta (funcall selector (/ pop-size 2) population fitness))
              ;(setf parentb (tournament-select-one population fitness))
              ;(print parentb)
 
-
+    
             (setf parentb (funcall selector (/ pop-size 2) population fitness))
         (dotimes (i (/ pop-size 2))
+      
             (setf children (funcall modifier (elt parenta i) (elt parentb i)))
             (push (elt children 0) q)
-            (push (elt children 1) q))
+            (push (elt children 1) q)
+            
+            )
 
       (setf population q)
       (setf q NIL))
@@ -461,9 +473,14 @@ then 1110000 is 1, 1111000 is 1, 1111100 is 1, and 1111110 is 2."
 (defun float-vector-creator ()
   "Creates a floating-point-vector *float-vector-length* in size, filled with
 random numbers in the range appropriate to the given problem"
-    ;;; IMPLEMENT ME
-    ;;; you might as well use random uniform numbers from *float-vector-min*
-    ;;; to *float-vector-max*.  
+(let* ((individual (make-array *float-vector-length*))) 
+        (loop for i from 0 to (- *float-vector-length* 1) do
+           
+            (setf (aref individual i)  (+ (random (- *float-max* *float-min*) ) *float-min*)) 
+            
+        )
+    individual
+    )
 
   )
 
@@ -478,19 +495,46 @@ then mutates the children.  *crossover-probability* is the probability that any
 given allele will crossover.  *mutation-probability* is the probability that any
 given allele in a child will mutate.  Mutation does gaussian convolution on the allele."
 
+ 
+   (let* ((child1 (copy-seq ind1)) ;; Double parentheses are required here
+    (child2 (copy-seq ind2)))
+    
+    (dotimes (i *float-vector-length*) 
+            (if ( < (random 1.0) *float-crossover-probability*)
+            (ROTATEF (elt child1 i) (elt child2 i))))
+            
+     (let* ((v 0)
+     (n 0))
+     (dolist (x (list child1 child2)) (dotimes (i *float-vector-length*)
+        (setf v (elt x i))
+        
+        (if (>= *float-mutation-probability* (random 1.0))
+        (progn  
+        (setf n (gaussian-random 0.0 *float-mutation-variance*) )
+            (loop while (or (> *float-min* (+ v n)) (< *float-max* (+ v n)))
+              do 
+              (setf n (gaussian-random 0.0 *float-mutation-variance*)))
+            (setf (elt x i) (+ v n))))))
+    (list child1 child2)))) 
+  
     ;;; IMPLEMENT ME
     ;;; Note: crossover is probably identical to the bit-vector crossover
     ;;; See "Gaussian Convolution" (Algorithm 11) in the book for mutation
 
-  )
+  
 
 ;;; To implement FLOAT-VECTOR-MODIFIER, the following function is strongly recommended
 
 (defun float-vector-sum-evaluator (ind1)
   "Evaluates an individual, which must be a floating point vector, and returns
 its fitness."
-
-    ;;; IMPLEMENT ME
+(let ((sum 0))
+        (loop for i from 0 to (- (length ind1) 1) do
+           
+            (setf sum (+ sum (aref ind1 i)))      
+)
+sum
+)
 )
 
 
@@ -567,7 +611,7 @@ and the floating-point ranges involved, etc.  I dunno."
 ;;; find individuals which are all very close to +5.12
 
 #|
-(evolve 50 1000
+(evolve 50 2000
  	:setup #'float-vector-sum-setup
 	:creator #'float-vector-creator
 	:selector #'tournament-selector
@@ -632,12 +676,10 @@ Then fills the remaining slots in the horizon with terminals.
 Terminals like X should be added to the tree
 in function form (X) rather than just X."
 
-
 (defvar root)
-(gp-symbolic-regression-setup)
 (if (= size 1)
   (progn
-  (setf root (elt *terminal-set* (random (length *terminal-set*))))
+  (setf root  (list (elt *terminal-set* (random (length *terminal-set*)))))
   ;(print root)
   )
   (progn 
@@ -683,6 +725,7 @@ in function form (X) rather than just X."
     )
     
 )
+
 root
 )
   #|
@@ -731,14 +774,16 @@ root
 
 
 (defparameter *size-limit* 20)
+
 (defun gp-creator ()
-(pc2 (+ 1 (random 20)))
+(defvar new-tree)
+(setf new-tree (ptc2 (+ 1 (random 20))))
+new-tree)
   "Picks a random number from 1 to 20, then uses ptc2 to create
 a tree of that size"
 
-
     ;;; IMPLEMENT ME
-  )
+  
 
 
 
@@ -756,8 +801,8 @@ a tree of that size"
     
     (if (listp (elt tree i))
       (progn 
-      (print (elt tree i))
-      (print (+ total (num-nodes (elt tree i))))
+      ;(print (elt tree i))
+      ;(print (+ total (num-nodes (elt tree i))))
       (setf total (+ total (num-nodes (elt tree i))))
       )
       (incf total 1)
@@ -800,7 +845,7 @@ If n is bigger than the number of nodes in the tree
    (setf parent tmp)
   (loop while (and (< i (- (length tmp) 1)) (/= nth n))
     do
-    (print (list parent (elt tmp i)))
+    ;(print (list parent (elt tmp i)))
    (incf nth)
   
     (incf i)
@@ -853,22 +898,33 @@ If n is bigger than the number of nodes in the tree
  (ind2-num (num-nodes ind2))
  (ind1-index (random ind1-num))
  (ind2-index (random ind2-num))
+ (chose (random 1.0))
  (results nil)
  (tmp NIL))
-  
-  (setf results (nth-subtree-parent ind1 1))
+(print "A1")
+
+  (setf results (nth-subtree-parent ind1 ind1-index))
+  (print (list "ind" ind1 "index" ind1-index "results" results))
   (setf ind1-nth (elt results 1))
   (setf ind1-parent (elt results 0))
-
-  (setf results (nth-subtree-parent ind2 2))
+  (setf results (nth-subtree-parent ind2 ind2-index))
+   (print (list "ind" ind2 "index" ind2-index  "results" results))
   (setf ind2-nth (elt results 1))
   (setf ind2-parent (elt results 0))
+  (print "A2")
 
- (print (list "A" ind1))
-  (print (list "B" ind2))
+  (if (< chose .5)
+  (progn
+  (print "A3")
   (rotatef (elt ind1-parent ind1-nth) (elt ind2-parent ind2-nth))
-  (print (list "A" ind1))
-  (print (list "B" ind2))
+  )
+  (progn
+  (print "A4")
+  (setf (elt ind1-parent ind1-nth) (ptc2 (+ 1 (random 10))))
+  (setf (elt ind2-parent ind2-nth) (ptc2 (+ 1 (random 10))))
+  )
+  )
+(list ind1 ind2)
  )
  )
  
@@ -956,6 +1012,30 @@ individual's fitness.  During evaluation, the expressions
 evaluated may overflow or underflow, or produce NaN.  Handle all
 such math errors by
 returning most-positive-fixnum as the output of that expression."
+
+;(setf example '(+ x x))
+;(setf x 2)
+;(setf y (lambda (x) (eval example)))
+;(funcall y 2)
+
+(let* ((sum 0)
+(i 0)
+(result 0)
+)
+(loop while (< i (length *vals*))
+  do
+ (print i)
+(setf *x* (elt *vals* i))
+(setf result (handler-case (eval ind) (error () most-positive-fixnum) ))
+ 
+(setf sum (+ sum (abs (- result (poly-to-learn *x*)))))
+(incf i))
+(/ 1.0 (+ 1.0 sum)))
+)
+
+
+
+
   ;;; hint:
   ;;; (handler-case
   ;;;  ....
@@ -965,7 +1045,7 @@ returning most-positive-fixnum as the output of that expression."
 
   ;;; IMPLEMENT ME
 
-  )
+  
 
 
 ;;; Example run
