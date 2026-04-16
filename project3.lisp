@@ -242,7 +242,7 @@ POP-SIZE, using various functions"
       (setf population q)
       (setf q NIL)
               (funcall printer population fitness)
-              (read-line)
+              
 
       )
         (funcall printer population fitness)
@@ -896,11 +896,10 @@ If n is bigger than the number of nodes in the tree
   )
 )
 (defparameter *mutation-size-limit* 10)
-(defun gp-modifier (ind1 ind2)
-(print "GP modifier")
+(defun gp-modifier (ind1-input ind2-input)
  (let* (
-  (ind1 (copy-tree ind1))
-  (ind2 (copy-tree ind2))
+  (ind1 (copy-tree ind1-input))
+  (ind2 (copy-tree ind2-input))
   (ind1-num (num-nodes ind1))
  (ind2-num  (num-nodes ind2))
  (ind1-index (random ind1-num))
@@ -916,7 +915,7 @@ If n is bigger than the number of nodes in the tree
     (if (eq results NIL)
     (progn 
      (setf ind1-nth 0)
-    (setf ind1-parent ind1)
+    (setf ind1-parent (list ind1))
     )
     (progn
       (setf ind1-nth (elt results 1))
@@ -930,7 +929,7 @@ If n is bigger than the number of nodes in the tree
 (if (eq results NIL)
     (progn 
      (setf ind2-nth 0)
-    (setf ind2-parent ind2)
+    (setf ind2-parent (list ind2))
     )
     (progn
       (setf ind2-nth (elt results 1))
@@ -955,6 +954,12 @@ If n is bigger than the number of nodes in the tree
   (setf (elt ind2-parent ind2-nth) (ptc2 (+ 1 (random 10))))
   )
   )
+
+(if (eq (nth-subtree-parent ind1-input ind1-index) NIL) 
+        (setf ind1 (elt ind1-parent 0)))
+    (if (eq (nth-subtree-parent ind2-input ind2-index) NIL) 
+        (setf ind2 (elt ind2-parent 0)))
+
 (list ind1 ind2)
 ;(print (list ind1 ind2))
  )
@@ -1056,7 +1061,6 @@ returning most-positive-fixnum as the output of that expression."
 )
 (if (and (listp ind) (listp (car ind)))
 (setf ind (car ind)))
-(print ind)
 (loop while (< i (length *vals*))
   do
  ;(print i)
