@@ -221,9 +221,9 @@ POP-SIZE, using various functions"
           (setf population-integer population)
           )
  
-
+        
          (setf fitness (mapcar evaluator population-integer)) 
-         
+          (print "evolve")
             ;(setf parenta (tournament-select-one population fitness))
             (setf parenta (funcall selector (/ pop-size 2) population fitness))
              ;(setf parentb (tournament-select-one population fitness))
@@ -232,7 +232,7 @@ POP-SIZE, using various functions"
     
             (setf parentb (funcall selector (/ pop-size 2) population fitness))
         (dotimes (i (/ pop-size 2))
-      
+     
             (setf children (funcall modifier (elt parenta i) (elt parentb i)))
             (push (elt children 0) q)
             (push (elt children 1) q)
@@ -240,7 +240,11 @@ POP-SIZE, using various functions"
             )
 
       (setf population q)
-      (setf q NIL))
+      (setf q NIL)
+              (funcall printer population fitness)
+              (read-line)
+
+      )
         (funcall printer population fitness)
         )   
 )
@@ -681,6 +685,7 @@ in function form (X) rather than just X."
   (progn
   (setf root  (list (elt *terminal-set* (random (length *terminal-set*)))))
   ;(print root)
+ 
   )
   (progn 
     (let* ((count 1)
@@ -776,9 +781,7 @@ root
 (defparameter *size-limit* 20)
 
 (defun gp-creator ()
-(defvar new-tree)
-(setf new-tree (ptc2 (+ 1 (random 20))))
-new-tree)
+(ptc2 (+ 1 (random 20))))
   "Picks a random number from 1 to 20, then uses ptc2 to create
 a tree of that size"
 
@@ -812,7 +815,7 @@ a tree of that size"
   total
 )
 )
-(num-nodes *example*) 
+;(num-nodes *example*) 
 
 
   "Given a tree, finds the nth node by depth-first search though
@@ -894,37 +897,66 @@ If n is bigger than the number of nodes in the tree
 )
 (defparameter *mutation-size-limit* 10)
 (defun gp-modifier (ind1 ind2)
- (let* ((ind1-num (num-nodes ind1))
- (ind2-num (num-nodes ind2))
+(print "GP modifier")
+ (let* (
+  (ind1 (copy-tree ind1))
+  (ind2 (copy-tree ind2))
+  (ind1-num (num-nodes ind1))
+ (ind2-num  (num-nodes ind2))
  (ind1-index (random ind1-num))
  (ind2-index (random ind2-num))
  (chose (random 1.0))
  (results nil)
  (tmp NIL))
-(print "A1")
+;(print "A1")
 
   (setf results (nth-subtree-parent ind1 ind1-index))
-  (print (list "ind" ind1 "index" ind1-index "results" results))
-  (setf ind1-nth (elt results 1))
-  (setf ind1-parent (elt results 0))
+  
+  ;(print "A2")
+    (if (eq results NIL)
+    (progn 
+     (setf ind1-nth 0)
+    (setf ind1-parent ind1)
+    )
+    (progn
+      (setf ind1-nth (elt results 1))
+       (setf ind1-parent (elt results 0))
+    )
+     )
+  ;(print (list "ind" ind1 "index" ind1-index "results" results))
+
   (setf results (nth-subtree-parent ind2 ind2-index))
-   (print (list "ind" ind2 "index" ind2-index  "results" results))
-  (setf ind2-nth (elt results 1))
-  (setf ind2-parent (elt results 0))
-  (print "A2")
+
+(if (eq results NIL)
+    (progn 
+     (setf ind2-nth 0)
+    (setf ind2-parent ind2)
+    )
+    (progn
+      (setf ind2-nth (elt results 1))
+       (setf ind2-parent (elt results 0))
+    )
+     )
+
+   ;(print (list "ind" ind2 "index" ind2-index  "results" results))  
+;  (setf ind2-nth (elt results 1))
+ ; (setf ind2-parent (elt results 0))
+
 
   (if (< chose .5)
   (progn
-  (print "A3")
+  ;(print "A3")
+  ;(print (list ind1-parent ind1-nth ind2-parent ind2-nth ))
   (rotatef (elt ind1-parent ind1-nth) (elt ind2-parent ind2-nth))
   )
   (progn
-  (print "A4")
+  ;(print "A4")
   (setf (elt ind1-parent ind1-nth) (ptc2 (+ 1 (random 10))))
   (setf (elt ind2-parent ind2-nth) (ptc2 (+ 1 (random 10))))
   )
   )
 (list ind1 ind2)
+;(print (list ind1 ind2))
  )
  )
  
@@ -1022,15 +1054,21 @@ returning most-positive-fixnum as the output of that expression."
 (i 0)
 (result 0)
 )
+(if (and (listp ind) (listp (car ind)))
+(setf ind (car ind)))
+(print ind)
 (loop while (< i (length *vals*))
   do
- (print i)
+ ;(print i)
+
 (setf *x* (elt *vals* i))
 (setf result (handler-case (eval ind) (error () most-positive-fixnum) ))
- 
 (setf sum (+ sum (abs (- result (poly-to-learn *x*)))))
-(incf i))
+(incf i)
+
+)
 (/ 1.0 (+ 1.0 sum)))
+
 )
 
 
