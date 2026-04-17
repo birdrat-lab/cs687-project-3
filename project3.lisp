@@ -209,7 +209,8 @@ POP-SIZE, using various functions"
 
         (setf population-integer NIL)  
         
-        (if (typep (elt (elt population 1) 1) 'boolean)
+        (if (and (> (length (elt population 1)) 1)
+         (typep (elt (elt population 1) 1) 'boolean))
         (dotimes (i (length population))     
           (let ((a NIL))
           (dotimes (j (length (elt population i))) 
@@ -532,13 +533,14 @@ given allele in a child will mutate.  Mutation does gaussian convolution on the 
 (defun float-vector-sum-evaluator (ind1)
   "Evaluates an individual, which must be a floating point vector, and returns
 its fitness."
-(let ((sum 0))
-        (loop for i from 0 to (- (length ind1) 1) do
+;(let ((sum 0))
+;        (loop for i from 0 to (- (length ind1) 1) do
            
-            (setf sum (+ sum (aref ind1 i)))      
-)
-sum
-)
+;            (setf sum (+ sum (aref ind1 i)))      
+;)
+;sum
+;)
+(sum-f ind1)
 )
 
 
@@ -705,6 +707,7 @@ in function form (X) rather than just X."
           (progn
             (setf a (append a (list (list NIL))))
             (enqueue (elt a 2) queue)))
+      
       ;(setf (car s) NIL)
       ;(print (car s))
       ;(print (append (car s) a) )
@@ -908,7 +911,7 @@ If n is bigger than the number of nodes in the tree
  (results nil)
  (tmp NIL))
 ;(print "A1")
-
+;(print (list ind1 ind2))
   (setf results (nth-subtree-parent ind1 ind1-index))
   
   ;(print "A2")
