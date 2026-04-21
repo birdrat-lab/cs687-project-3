@@ -283,7 +283,7 @@ POP-SIZE, using various functions"
               (setf (aref individual i) NIL)))
     individual))
 
-(defparameter *boolean-crossover-probability* 0.2)
+(defparameter *boolean-crossover-probability* 0.02)
 (defparameter *boolean-mutation-probability* 0.01)
 
 
@@ -297,7 +297,7 @@ The individuals are guaranteed to be the same length.  Returns NIL."
 
 (defun boolean-vector-modifier (ind1 ind2)
     "Copies and modifies ind1 and ind2 by crossing them over with a uniform crossover,
-then mutates the children.  *crossover-probability* is the probability that any
+then mutates the children.  *crossover-probability* is the probability that a
 given allele will crossover.  *mutation-probability* is the probability that any
 given allele in a child will mutate.  Mutation simply flips the bit of the allele."
   (let* ((child1 (copy-seq ind1)) 
@@ -362,7 +362,7 @@ then 1110000 is 1, 1111000 is 1, 1111100 is 1, and 1111110 is 2."
 	:creator #'boolean-vector-creator
 	:selector #'tournament-selector
 	:modifier #'boolean-vector-modifier
-        :evaluator #'leading-ones-
+        :evaluator #'max-ones-f
 	:printer #'simple-printer)
 |#
 
@@ -418,7 +418,8 @@ random numbers in the range appropriate to the given problem"
 
 (defparameter *float-crossover-probability* 0.2)
 (defparameter *float-mutation-probability* 0.1)   ;; I just made up this number
-(defparameter *float-mutation-variance* 0.01)     ;; I just made up this number
+(defparameter *float-mutation-variance* 0.01) ;; I just made up this number
+
 
 (defun float-vector-modifier (ind1 ind2)
   "Copies and modifies ind1 and ind2 by crossing them over with a uniform crossover,
@@ -426,8 +427,7 @@ then mutates the children.  *crossover-probability* is the probability that any
 given allele will crossover.  *mutation-probability* is the probability that any
 given allele in a child will mutate.  Mutation does gaussian convolution on the allele."
 
- 
-  (let* ((child1 (copy-seq ind1)) 
+   (let* ((child1 (copy-seq ind1)) 
 	 (child2 (copy-seq ind2)))
     
     (dotimes (i *float-vector-length*) 
@@ -445,8 +445,8 @@ given allele in a child will mutate.  Mutation does gaussian convolution on the 
 		(loop while (or (> *float-min* (+ v n)) (< *float-max* (+ v n)))
 		      do 
 		      (setf n (gaussian-random 0.0 *float-mutation-variance*)))
-		(setf (elt x i) (+ v n))))))
-      (list child1 child2)))) 
+		(setf (elt x i) (+ v n)))))
+      (list child1 child2)))))
   
 
 ;;; To implement FLOAT-VECTOR-MODIFIER, the following function is strongly recommended
@@ -771,7 +771,7 @@ If n is bigger than the number of nodes in the tree
   "Flips a coin.  If it's heads, then ind1 and ind2 are
 crossed over using subtree crossover.  If it's tails, then
 ind1 and ind2 are each mutated using subtree mutation, where
-the size of the newly-generated subtrees is pickedc at random
+the size of the newly-generated subtrees is picked at random
 from 1 to 10 inclusive.  Doesn't damage ind1 or ind2.  Returns
 the two modified versions as a list."
 
@@ -786,6 +786,7 @@ the two modified versions as a list."
 	 (ind1-parent)
 	 (ind2-nth)
 	 (ind2-parent)
+	 (crossover-prob 0.9)
 	 (results nil))
     
 	 (setf results (nth-subtree-parent ind1 ind1-index))
@@ -806,7 +807,7 @@ the two modified versions as a list."
 	    (progn
 	      (setf ind2-nth (elt results 1))
 	      (setf ind2-parent (elt results 0))))
-	(if (< chose .5)
+	(if (< chose crossover-prob)
 	    (progn
 	      (rotatef (elt ind1-parent ind1-nth) (elt ind2-parent ind2-nth)))
 	    (progn
